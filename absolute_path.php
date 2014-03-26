@@ -2,34 +2,44 @@
 
 class Absolute_Path {
 
-    private $top_url;
-    private $current_url;
+    private $_top_url;
+    private $_current_url;
 
-    public function __construct($base_url) {
+    public function __construct($base_url='') {
 
-        $this->top_url = $this->getTopPath($base_url);
-
-        if(strlen($this->top_url) > strlen($base_url)) {
-
-            $base_url = $this->top_url;
-
-        }
-
-        $this->current_url = $this->getCurrentPath($base_url);
-
+    	if($base_url != '') {
+    		
+    		$this->setBaseUrl($base_url);
+    		
+    	}
+    	
+    }
+    
+    public function setBaseUrl($url) {
+    	
+    	$this->_top_url = $this->getTopPath($url);
+    	
+    	if(strlen($this->_top_url) > strlen($url)) {
+    	
+    		$base_url = $this->_top_url;
+    	
+    	}
+    	
+    	$this->_current_url = $this->getCurrentPath($url);
+    	
     }
 
-    public function getResult($target_path) {
+    public function get($target_path) {
 
         $first_str = substr($target_path, 0, 1);
 
         if($first_str == '/') {
 
-            return $this->top_url . substr($target_path, 1);
+            return $this->_top_url . substr($target_path, 1);
 
         } else if(substr($target_path, 0, 2) == './') {
 
-            return $this->current_url . substr($target_path, 2);
+            return $this->_current_url . substr($target_path, 2);
 
         } else if(strstr($target_path, '../')) {
 
@@ -37,7 +47,7 @@ class Absolute_Path {
 
         } else if(substr($target_path, 0, 7) != 'http://' && substr($target_path, 0, 8) != 'https://') {
 
-            return $this->current_url . $target_path;
+            return $this->_current_url . $target_path;
 
         } else {
 
@@ -49,7 +59,7 @@ class Absolute_Path {
 
     private function getOverPath($path) {
 
-        $current_url = $this->current_url;
+        $current_url = $this->_current_url;
 
         $over_count = substr_count($path, '../');
 
@@ -104,7 +114,7 @@ class Absolute_Path {
 
     private function getParentPath($path) {
 
-        if($path == $this->top_url) return $path;
+        if($path == $this->_top_url) return $path;
 
         $return = '';
 
@@ -131,12 +141,13 @@ class Absolute_Path {
 
 /*** Sample Source
 
-    require('absolute_path.php');
+    require 'absolute_path.php';
 
     $base_url = 'http://example.com/test/test/index.html';
     $target_path = '../../test.html';
 
-    $ap = new Absolute_Path($base_url);
-    $absolute_path = $ap->getResult($target_path);
+    $ap = new Absolute_Path();	// or new Absolute_Path($base_url);
+    $ap->set($base_url);
+    $absolute_path = $ap->get($target_path);
 
 ***/
